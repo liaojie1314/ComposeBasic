@@ -1,4 +1,4 @@
-[资料来源](https://docs.bughub.icu/compose)
+[资料来源https://docs.bughub.icu/compose](https://docs.bughub.icu/compose)
 
 # Jetpack Compose 是什么？
 
