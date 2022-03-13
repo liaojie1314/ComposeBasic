@@ -12,7 +12,7 @@ Android Studio一定要确定版本是Arctic Fox | 2020.3.1之后的版本（包
 
 ## Text
 
-Text 文本显示控件
+### Text 文本显示控件
 
 ```kotlin
 @Composable
@@ -36,9 +36,9 @@ fun Text(
 ): Unit
 ```
 
-用法:
+###用法:
 
-直接显示
+#### 直接显示
 
 ```kotlin
 @Composable
@@ -47,7 +47,7 @@ fun TextSample() {
 }
 ```
 
-从 res 中读取文字显示
+#### 从 res 中读取文字显示
 
 ```kotlin
 @Composable
@@ -60,8 +60,8 @@ fun TextSample() {
 </resources>
 ```
 
-参数
-color 设置字体颜色
+##### 参数
++ color 设置字体颜色
 
 ```kotlin
 @Composable
@@ -70,7 +70,7 @@ fun TextSample() {
 }
 ```
 
-fontSize 设置文字大小
++ fontSize 设置文字大小
 
 fontSize 默认是跟随父级文字大小。
 
@@ -104,7 +104,7 @@ fun TextSample2() {
 }
 ```
 
-fontStyle 设置文字样式
++ fontStyle 设置文字样式
 
 + FontStyle.Italic 设置为斜体
 + FontStyle.Normal 设置为正常体(默认状态)
@@ -116,7 +116,7 @@ fun TextSample() {
 }
 ```
 
-fontWeight 设置文字比重
++ fontWeight 设置文字比重
 
 系统预设了很多比重值可以直接使用，例如 FontWeight.Bold ，也可以使用 FontWeight(100)
 fontFamily 设置文字字体
@@ -138,7 +138,7 @@ fun TextSample() {
     Text(text = "Hello World!", fontFamily = firaSansFamily))
 }
 ```
-letterSpacing 设置字符间距
++ letterSpacing 设置字符间距
 
 ```kotlin
 @Composable
@@ -147,11 +147,10 @@ fun TextSample() {
 }
 ```
 
-textDecoration 设置文字装饰
-
-+ TextDecoration.None 无装饰(默认)
-+ TextDecoration.Underline 下划线
-+ TextDecoration.LineThrough 删除线
++ textDecoration 设置文字装饰
+    + TextDecoration.None 无装饰(默认)
+    + TextDecoration.Underline 下划线
+    + TextDecoration.LineThrough 删除线
 
 还可以通过TextDecoration.combine()合并使用多种装饰
 
@@ -170,15 +169,15 @@ fun TextSample() {
 }
 ```
 
-textAlign 设置文本对齐方式
++ textAlign 设置文本对齐方式
 
 需要固定宽度，才有效果
 
-+ TextAlign.Center
-+ TextAlign.End
-+ TextAlign.Justify
+    + TextAlign.Center
+    + TextAlign.End
+    + TextAlign.Justify
 
-lineHeight 设置文本行高
++ lineHeight 设置文本行高
 
 ```kotlin
 @Composable
@@ -187,13 +186,13 @@ fun TextSample() {
 }
 ```
 
-overflow 设置文本超出时如何显示
++ overflow 设置文本超出时如何显示
 
 + TextOverflow.Ellipsis 以省略号显示
 + TextOverflow.Clip 裁剪
 + TextOverflow.Visible 尽可能显示
 
-maxLines 文本显示行数
++ maxLines 文本显示行数
 
 ```kotlin
 @Composable
@@ -202,14 +201,14 @@ fun TextSample() {
 }
 ```
 
-style 样式
++ style 样式
 
 上面讲到的大部分文字修饰，都可以直接通过 TextStyle 进行修饰，除此之外还多出几个样式
 
-+ fontFeatureSettings字体的高级设置，类似 CSS的font-feature-settings，可以参考https://www.w3.org/TR/css-fonts-3/#font-feature-settings-prop
-+ background 设置背景颜色
-+ shadow 设置阴影
-+ textIndent 设置首先缩进
+    + fontFeatureSettings字体的高级设置，类似 CSS的font-feature-settings，可以参考https://www.w3.org/TR/css-fonts-3/#font-feature-settings-prop
+    + background 设置背景颜色
+    + shadow 设置阴影
+    + textIndent 设置首先缩进
 
 ```kotlin
 @Composable
@@ -230,7 +229,7 @@ fun TextSample() {
 }
 ```
 
-SelectionContainer 文字复制
++ SelectionContainer 文字复制
 
 默认情况下 Text 并不能进行复制等操作，我们需要设置 SelectionContainer 来包装 Text
 
@@ -245,7 +244,7 @@ fun TextSample() {
 }
 ```
 
-Text 语句中设置不同样式
++ Text 语句中设置不同样式
 
 如果想让一个 Text 语句中有不同的样式，需要使用到 AnnotaedString
 
@@ -273,7 +272,7 @@ fun TextSample() {
 }
 ```
 
-ClickableText文本点击控件
++ ClickableText文本点击控件
 
 想要让文本可以接收到点击事件，可以使用 ClickableText，控件带有一个 onClick 参数，参数回调中还可以知道当前点击字条的 offset 是多少
 简单用法
@@ -302,7 +301,7 @@ fun TextSample() {
 }
 ```
 
-高级用法
+#### 高级用法
 
 从上面 设置不同样式 和 文本点击 我们知道了如何在 Text 语句内设置不同的样式，也知道了如何获得点击的文字，那我们是不是可以实现在文本内设置部分文字可以点击呢！
 
@@ -343,6 +342,239 @@ fun TextSample() {
                     Log.d("TextSample", "点击了隐私政策：${annotation.item}")
                 }
         }
+    )
+}
+```
+
+## Button
+
+##### 属性
+
+```kotlin
+@Composable
+fun Button(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    elevation: ButtonElevation? = ButtonDefaults.elevation(),
+    shape: Shape = MaterialTheme.shapes.small,
+    border: BorderStroke? = null,
+    colors: ButtonColors = ButtonDefaults.buttonColors(),
+    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    content: @Composable RowScope.() -> Unit
+): Unit
+```
+
+### 基本用法
+
+```kotlin
+@Composable
+fun ButtonSample() {
+    Button(
+        onClick = {
+            Log.d("ButtonSample", "click the button")
+        },
+    ) {
+        Text(text = "这里有一个按钮")
+    }
+}
+```
+
+##### 参数
+
++ enabled 是否启用或禁用
++ elevation 投影
++ border 边框线
+
+```kotlin
+@Composable
+fun ButtonSample() {
+    Button(
+        onClick = {
+            Log.d("ButtonSample", "click the button")
+        },
+        border = BorderStroke(1.dp,Color.Red)
+    ) {
+        Text(text = "这里有一个按钮")
+    }
+}
+```
+
++ colors设置颜色，可以设置背景颜色、前景颜色、禁用状态和启动状态下的颜色
+
+```kotlin
+@Composable
+fun ButtonSample() {
+    Button(
+        onClick = {
+            Log.d("ButtonSample", "click the button")
+        },
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = Color.Yellow,
+            contentColor = Color.Green
+        )
+    ) {
+        Text(text = "这里有一个按钮")
+    }
+}
+```
+
++ contentPadding 内容内间距
+
+### TextButton
+
+TextButton一般是用来显示文字按钮的
+
+```kotlin
+@Composable
+fun ButtonSample() {
+    TextButton(
+        onClick = {
+            Log.d("ButtonSample", "click the button")
+        },
+    ) {
+        Text(text = "TextButton")
+    }
+}
+```
+
+### OutlinedButton
+
+```kotlin
+@Composable
+fun ButtonSample() {
+    OutlinedButton(
+        onClick = {
+            Log.d("ButtonSample", "click the button")
+        },
+    ) {
+        Text(text = "OutlinedButton")
+    }
+}
+```
+
+### IconButton
+
+用来显示图标按钮
+
+```kotlin
+@Composable
+fun ButtonSample() {
+    IconButton(
+        onClick = {
+            Log.d("ButtonSample", "click the button")
+        },
+    ) {
+        Icon(imageVector = Icons.Default.Stairs, contentDescription = null)
+    }
+}
+```
+
+## Icon
+
+##### 属性
+
+```kotlin
+@Composable
+fun Icon(
+    imageVector: ImageVector,//bitmap: ImageBitmap,painter: Painter,
+    contentDescription: String?,
+    modifier: Modifier = Modifier,
+    tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+)
+```
+
+### 用法
+
+#### 用法一
+
+可以直接引用官方的图标库 ，例如：Icons.Default.AccountBox
+
+```kotlin
+@Composable
+fun IconSample() {
+    Icon(imageVector = Icons.Default.AccountBox, contentDescription = null)
+}
+```
+
+在官方网站上，我们看到提供的图标库中，有些可能无法正常显示。是因为默认 SDK 中只是包含部分图标，如果需要使用更多图标需要引入扩展库
+
+> implementation "androidx.compose.material:material-icons-extended:$compose_version" 
+
+#### 用法二
+
+可以使用 drawble 里面的图片
+
+```kotlin
+@Composable
+fun IconSample() {
+  Icon(
+    painter = painterResource(id = R.drawable.ic_android_black_24dp),
+    contentDescription = null,
+    tint = Color.Blue
+  )
+}
+```
+
+#### 用法三
+
+可以引用 ImageBitmap
+
+```kotlin
+@Composable
+fun IconSample() {
+    var bitmap:ImageBitmap ? = null
+    with(LocalContext.current){
+         bitmap = ImageBitmap.imageResource(resources,R.drawable.newbanner4)
+    }
+    bitmap?.let { Icon(bitmap = it, contentDescription = null) }
+}
+```
+
+##### 参数
+
++ tint 设置图标颜色
+
+```kotlin
+@Composable
+fun IconSample() {
+    Icon(imageVector = Icons.Default.Deck, contentDescription = null, tint = Color.Red)
+}
+```
+
+## Image
+
+##### 属性
+
+```kotlin
+@Composable
+fun Image(
+    painter: Painter,
+    contentDescription: String?,
+    modifier: Modifier = Modifier,
+    alignment: Alignment = Alignment.Center,
+    contentScale: ContentScale = ContentScale.Fit,
+    alpha: Float = DefaultAlpha,
+    colorFilter: ColorFilter? = null
+): Unit
+```
+
+图片跟 Icon 差不多也可以通过三种方式引入图片，本页只展示一种方式
+
+##### 参数
+
++ contentScale 设置图片的伸展方式：ContentScale.Inside、ContentScale.Crop 等
++ colorFilter 设置颜色滤镜
+
+```kotlin
+@Composable
+fun ImageSample() {
+    Image(
+        painter = painterResource(id = R.drawable.newbanner4),
+        contentDescription = null,
+        contentScale = ContentScale.Inside,
+        colorFilter = ColorFilter.tint(Color.Red, blendMode = BlendMode.Color)
     )
 }
 ```
