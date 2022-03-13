@@ -10,15 +10,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ComposeBasic">
         <activity
-            android:name=".MainActivity"
+            android:name=".MotionLayoutActivity"
             android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.ComposeBasic">
+            android:label="@string/title_activity_motion_layout"
+            android:theme="@style/Theme.ComposeBasic" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.ComposeBasic">
         </activity>
     </application>
 
