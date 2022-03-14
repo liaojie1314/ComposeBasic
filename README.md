@@ -633,6 +633,7 @@ fun ArtistCard(/*...*/) {
 ```
 
 > Warning
+
 > 如果指定的大小不满足父布局的约束，则尺寸将会无效。如果强制设置请使用而不考虑父控件约束，可以使用 requiredSize
 
 ```kotlin
@@ -749,6 +750,7 @@ fun HelloContent() {
 ```
 
 > Warning
+
 > 虽然remember可以在重组后保持状态，但如果是应用的配置更新了，比如屏幕旋转，这时候这个状态也会重置。因此，必须使用 rememberSaveable。 rememberSaveable会自动保存可保存的 Bundle 中的值。对于其他值，可以将其传入自定义 Saver 对象。
 
 ### 其他可观察对象
@@ -762,9 +764,11 @@ Jetpack Compose 不强制使用 MutableState存储状态，也支持其他可观
 + [RxJava2](https://developer.android.com/reference/kotlin/androidx/compose/runtime/rxjava2/package-summary)
 
 > Tip
+
 > Compose 是通过读取State对象自动重组界面的。 如果在 Compose 中使用 LiveData 等其他可观察类型，应该先将其转换为 State 然后再使用。比如 LiveData<T>.observeAsState()。
 
 > Warning
+
 > 在 Compose 中将可变对象，如 ArrayList或 mutableListOf()等用作状态，可以造成界面无法更新，用户看到的永远是旧的数据。建议使用可观察的数据存储器，如 State>和不可变的 listOf()，而不是使用不可观察的可变对象。
     
 ### 状态提升
