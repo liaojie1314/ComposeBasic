@@ -819,11 +819,11 @@ fun HelloContent(name: String, onNameChange: (String) -> Unit) {
 
 状态下降、事件上升的这种模式称为“单向数据流”。在这种情况下，状态会从 HelloScreen 下降为 HelloContent，事件会从 HelloContent 上升为 HelloScreen。通过遵循单向数据流，您可以将在界面中显示状态的可组合项与应用中存储和更改状态的部分解耦。
 
-> Note
-    > When hoisting state, there are three rules to help you figure out where state should go:
-    > State should be hoisted to at least the lowest common parent of all composables that use the state (read).
-    > If two states change in response to the same events they should be hoisted together.
-    > State should be hoisted to at least the highest level it may be changed (write).
+> Note:
+> When hoisting state, there are three rules to help you figure out where state should go:
+> State should be hoisted to at least the lowest common parent of all composables that use the state (read).
+> If two states change in response to the same events they should be hoisted together.
+> State should be hoisted to at least the highest level it may be changed (write).
 > 提升状态时，有三条规则：
 > 1.状态应至少提升到使用该状态(读取)的所有Composable的最低共同父项
 > 2.状态应至少提升到它可以发生变化(写入)的最高级别
