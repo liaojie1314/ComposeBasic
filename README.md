@@ -578,3 +578,279 @@ fun ImageSample() {
     )
 }
 ```
+
+## 生命周期
+
+### Side-Effects
+
+在学习生命周期之前先了解一下 Side-Effects。翻译过来就是副作用，那么在程序中什么是副作用呢？
+
+一个函数有以下情况(不仅限)说明有副作用：
+
+- 引用和修改了函数之外的变量
+- 改变了函数的入参
+- 调用了其他有副作用的函数
+
+Composable 本身是没有副作用的。Jetpack Compose 提供了不同的 API 来让 Composable 能感知外部数据的改变。
+
+由于使用这些API带来各种可能性，容易过度使用。所以确保在其中完成的工作与界面相关，并且不会打乱单一数据源原则。
+
+### LanuchedEffect
+
+如果需要在 Compasable 内安全调用挂起函数，可以使用 `LaunchedEffect` 。 `LaunchedEffect` 会自动启动一个协程，并将代码块作为参数传递。当 `LaunchedEffect` 离开 Composable 或 Composable 销毁时，协程也将取消。如果 `LaunchedEffect` 的 key 值改变了，系统将取消现有协程，并在新的协程中启动新的挂起函数。
+
+例如，在 `Scaffold` 中显示 `Snackbar` 是通过 `SnackbarHostState.showSnackbar` 来完成的。这个函数是一个挂起函数。
+
+```kotlin
+@Composable
+fun MyScreen(
+    state: UiState<List<Movie>>,
+    scaffoldState: ScaffoldState = rememberScaffoldState()
+) {
+
+    // If the UI state contains an error, show snackbar
+    if (state.hasError) {
+
+        // `LaunchedEffect` will cancel and re-launch if
+        // `scaffoldState.snackbarHostState` changes
+        LaunchedEffect(scaffoldState.snackbarHostState) {
+            // Show snackbar using a coroutine, when the coroutine is cancelled the
+            // snackbar will automatically dismiss. This coroutine will cancel whenever
+            // `state.hasError` is false, and only start when `state.hasError` is true
+            // (due to the above if-check), or if `scaffoldState.snackbarHostState` changes.
+            scaffoldState.snackbarHostState.showSnackbar(
+                message = "Error message",
+                actionLabel = "Retry message"
+            )
+        }
+    }
+
+    Scaffold(scaffoldState = scaffoldState) {
+        /* ... */
+    }
+}
+```
+
+在上面的代码中，如果state 中有错误，就会触发协程，如果没有错误，则将取消协程。
+
+### rememberCoroutineScope
+
+由于 `LanchedEffect` 是Composable 函数，只能在其他 Composable 中使用。为了可以在 Composable 之外启动协程，且在离开 Composable 时自动取消协程，可以使用 `rememberCoroutineScope` 。此外，如果需要手动控制协程的生命周期时，也可以使用 `rememberCoroutineScope` 。
+
+`rememberCoroutineScope` 是一个 Composable 函数，会返回一个  `CoroutineScope` ，这个  `CoroutineScope` 会绑定到调用它的 Composable 。
+
+根据上面的例子，当用户点击按钮时，可以使用以下代码来显示 Snackbar
+
+```kotlin
+@Composable
+fun MoviesScreen(scaffoldState: ScaffoldState = rememberScaffoldState()) {
+
+    // Creates a CoroutineScope bound to the MoviesScreen's lifecycle
+    val scope = rememberCoroutineScope()
+
+    Scaffold(scaffoldState = scaffoldState) {
+        Column {
+            /* ... */
+            Button(
+                onClick = {
+                    // Create a new coroutine in the event handler to show a snackbar
+                    scope.launch {
+                        scaffoldState.snackbarHostState.showSnackbar("Something happened!")
+                    }
+                }
+            ) {
+                Text("Press me")
+            }
+        }
+    }
+}
+```
+
+### rememberUpdatedState
+
+上面说到 `LaunchedEffect` 可以传入一个 key 值，当 key 改变时 `LaunchedEffect` 会重启。但是在某些情况下，不希望捕获某个值，该值发生变化时，不想让 `LaunchedEffect` 重启。因此需要使用 `rememberUpdatedState` 来创建对可捕获和更新的该值的引用。
+
+假设有一个LandingScreen，需要在一段时间后消失。即使 LandingScreen 在这一段时间内进行了重组，也不应该重新计时
+
+```kotlin
+@Composable
+fun LandingScreen(onTimeout: () -> Unit) {
+
+    // This will always refer to the latest onTimeout function that
+    // LandingScreen was recomposed with
+    val currentOnTimeout by rememberUpdatedState(onTimeout)
+
+    // Create an effect that matches the lifecycle of LandingScreen.
+    // If LandingScreen recomposes, the delay shouldn't start again.
+    LaunchedEffect(true) {
+        delay(SplashWaitTimeMillis)
+        currentOnTimeout()
+    }
+
+    /* Landing screen content */
+}
+```
+
+为了创建与 Composable 生命周期相匹配的 `LaunchedEffect`，可以将一个不会发生改变的常量（如`Unit`或`true`）作为参数传递。
+
+### DisposableEffect
+
+对于需要对于某个值改变时或 Composable 退出后进行销毁或清理操作时，可以使用 `DisposableEffect`。当 `DisposableEffect` 的 key 发生改变时，会调用 `onDispose` 方法，可以在方法中作清理操作，然后再次调用重启。
+
+例如，在使用 `LifecycleObserver` 进行 `Lifecycle` 事件进行监听时，可以根据需要使用 `DisposableEffect` 来注册和取消观察器。
+
+```kotlin
+@Composable
+fun HomeScreen(
+    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
+    onStart: () -> Unit, // Send the 'started' analytics event
+    onStop: () -> Unit // Send the 'stopped' analytics event
+) {
+    // Safely update the current lambdas when a new one is provided
+    val currentOnStart by rememberUpdatedState(onStart)
+    val currentOnStop by rememberUpdatedState(onStop)
+
+    // If `lifecycleOwner` changes, dispose and reset the effect
+    DisposableEffect(lifecycleOwner) {
+        // Create an observer that triggers our remembered callbacks
+        // for sending analytics events
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_START) {
+                currentOnStart()
+            } else if (event == Lifecycle.Event.ON_STOP) {
+                currentOnStop()
+            }
+        }
+
+        // Add the observer to the lifecycle
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        // When the effect leaves the Composition, remove the observer
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    /* Home screen content */
+}
+```
+
+在上面的代码中，`DisposableEffect` 将 `observer` 添加到 `lifecycleOwner` 。如果 `lifecycleOwner` 发生变化，会先`removeObserver`，然后再重启。
+
+`DisposableEffect` 必须在其代码块中添加 `onDispose` 子句作为结束语句。否则，IDE 将会报错。
+
+### SideEffect
+
+需要与非 Compose 管理的对象共享 Compose 状态时，可以使用 `SideEffect`，`SideEffect` 在每次重组完成后都会被调用。
+
+例如，当需要进行统计用户类型数据时：
+
+```kotlin
+@Composable
+fun rememberAnalytics(user: User): FirebaseAnalytics {
+    val analytics: FirebaseAnalytics = remember {
+        /* ... */
+    }
+
+    // On every successful composition, update FirebaseAnalytics with
+    // the userType from the current User, ensuring that future analytics
+    // events have this metadata attached
+    SideEffect {
+        analytics.setUserProperty("userType", user.userType)
+    }
+    return analytics
+}
+```
+
+### produceState
+
+`produceState` 会启动一个协程，将非 Compose 状态转换为 Compose 状态。
+
+以下示例展示了如何使用 `produceState` 从网络加载图像。`loadNetworkImage` 函数会返回可以在其他Composable中使用的 `State`。
+
+```kotlin
+@Composable
+fun loadNetworkImage(
+    url: String,
+    imageRepository: ImageRepository
+): State<Result<Image>> {
+
+    // Creates a State<T> with Result.Loading as initial value
+    // If either `url` or `imageRepository` changes, the running producer
+    // will cancel and will be re-launched with the new inputs.
+    return produceState<Result<Image>>(initialValue = Result.Loading, url, imageRepository) {
+
+        // In a coroutine, can make suspend calls
+        val image = imageRepository.load(url)
+
+        // Update State with either an Error or Success result.
+        // This will trigger a recomposition where this State is read
+        value = if (image == null) {
+            Result.Error
+        } else {
+            Result.Success(image)
+        }
+    }
+}
+```
+
+### derivedStateOf
+
+如果某个状态是从其他状态对象计算或派生得出的，请使用 derivedStateOf。使用此函数可确保仅当计算中使用的状态之一发生变化时才会进行计算。
+
+以下示例展示了基本的“待办事项”列表，其中具有用户定义的高优先级关键字的任务将首先显示：
+
+```kotlin
+@Composable
+fun TodoList(highPriorityKeywords: List<String> = listOf("Review", "Unblock", "Compose")) {
+
+    val todoTasks = remember { mutableStateListOf<String>() }
+
+    // Calculate high priority tasks only when the todoTasks or highPriorityKeywords
+    // change, not on every recomposition
+    val highPriorityTasks by remember(highPriorityKeywords) {
+        derivedStateOf { todoTasks.filter { it.containsWord(highPriorityKeywords) } }
+    }
+
+    Box(Modifier.fillMaxSize()) {
+        LazyColumn {
+            items(highPriorityTasks) { /* ... */ }
+            items(todoTasks) { /* ... */ }
+        }
+        /* Rest of the UI where users can add elements to the list */
+    }
+}
+```
+
+在以上代码中，derivedStateOf 保证每当 todoTasks 发生变化时，系统都会执行 highPriorityTasks  计算，并相应地更新界面。如果 highPriorityKeywords 发生变化，系统将执行 remember  代码块，并且会创建新的派生状态对象并记住该对象，以代替旧的对象。由于执行过滤以计算 highPriorityTasks  的成本很高，因此应仅在任何列表发生更改时才执行，而不是在每次重组时都执行。
+
+此外，更新 derivedStateOf 生成的状态不会导致可组合项在声明它的位置重组，Compose 仅会对返回状态为已读的可组合项（在本例中，指 LazyColumn 中的可组合项）进行重组。
+
+该代码还假设 highPriorityKeywords 的变化频率显著低于 todoTasks。否则，该代码会使用 remember(todoTasks, highPriorityKeywords) 而不是 derivedStateOf。
+
+### snapshotFlow
+
+使用 snapshotFlow 将 State 对象转换为冷 Flow。snapshotFlow  会在收集到块时运行该块，并发出从块中读取的 State 对象的结果。当在 snapshotFlow 块中读取的 State  对象之一发生变化时，如果新值与之前发出的值不相等，Flow 会向其收集器发出新值（此行为类似于  Flow.distinctUntilChanged 的行为）。
+
+下列示例显示了一项附带效应，是系统在用户滚动经过要分析的列表的首个项目时记录下来的：
+
+```kotlin
+val listState = rememberLazyListState()
+
+LazyColumn(state = listState) {
+    // ...
+}
+
+LaunchedEffect(listState) {
+    snapshotFlow { listState.firstVisibleItemIndex }
+        .map { index -> index > 0 }
+        .distinctUntilChanged()
+        .filter { it == true }
+        .collect {
+            MyAnalyticsService.sendScrolledPastFirstItemEvent()
+        }
+}
+```
+
+在上方代码中，listState.firstVisibleItemIndex 被转换为一个 Flow，从而可以受益于 Flow 运算符的强大功能。
+
