@@ -1596,3 +1596,7 @@ fun ReusablePartOfTheScreen(content: @Composable () -> Unit) {
     }
 }
 ```
+
+## 动画
+    
+[参考官方文档](https://developer.android.google.cn/jetpack/compose/animation)
