@@ -1346,3 +1346,253 @@ LaunchedEffect(listState) {
 
 在上方代码中，listState.firstVisibleItemIndex 被转换为一个 Flow，从而可以受益于 Flow 运算符的强大功能。
 
+## CompositionLocal
+
+### CompositionLocal 简介
+
+通常在 Compose 中，数据以参数形式显式向下传递到每个 Composable 中。这样对于一些使用频率很高的数据(如颜色或类型样式)来说就很麻烦了，需要一层一层传递。
+
+```kotlin
+@Composable
+fun MyApp() {
+    // Theme information tends to be defined near the root of the application
+    val colors = …
+}
+
+// Some composable deep in the hierarchy
+@Composable
+fun SomeTextLabel(labelText: String) {
+    Text(
+        text = labelText,
+        color = // ← need to access colors here
+    )
+}
+```
+
+为了支持无需显式传递参数给其他 Composable，Compose 提供了 CompositionLocal ，可以让你创建以树为作用域的具名对象，用作数据隐匿流向子界面的方式。
+
+MaterialTheme 对象提供了三个 CompositionLocal 实例，即 colors、typography 和 shapes。可以在任何地方拿到这些实例进行使用。具体来说，这些 MaterialTheme的 colors、shapes 和 typography 属性就是访问 LocalColors、LocalShapes 和 LocalTypography。
+
+```kotlin
+@Composable
+fun MyApp() {
+    // Provides a Theme whose values are propagated down its `content`
+    MaterialTheme {
+        // New values for colors, typography, and shapes are available
+        // in MaterialTheme's content lambda.
+
+        // ... content here ...
+    }
+}
+
+// Some composable deep in the hierarchy of MaterialTheme
+@Composable
+fun SomeTextLabel(labelText: String) {
+    Text(
+        text = labelText,
+        // `primary` is obtained from MaterialTheme's
+        // LocalColors CompositionLocal
+        color = MaterialTheme.colors.primary
+    )
+}
+```
+
+CompositionLocal 实例的作用域限定为Composable的一部分，因此可以在结构树的不同级别提供不同的值。CompositionLocal 的 current 值对应于Composable的某个父级提供的就近值。
+
+如需为 CompositionLocal 提供新值，请使用 CompositionLocalProvider 及其 provides infix 函数，该函数将 CompositionLocal 键与 value 相关联。在访问 CompositionLocal 的 current 属性时，CompositionLocalProvider 的 content lambda 将获取提供的值。提供新值后，Compose 会重组读取 CompositionLocal 的组合部分。
+
+例如，LocalContentAlpha 包含用于文本和图标的首选内容 Alpha 值，以强调或弱化界面的不同部分。在以下示例中，CompositionLocalProvider 用于为组合的不同部分提供不同的值。
+
+```kotlin
+@Composable
+fun CompositionLocalExample() {
+    MaterialTheme { // MaterialTheme sets ContentAlpha.high as default
+        Column {
+            Text("Uses MaterialTheme's provided alpha")
+            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+                Text("Medium value provided for LocalContentAlpha")
+                Text("This Text also uses the medium value")
+                CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.disabled) {
+                    DescendantExample()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DescendantExample() {
+    // CompositionLocalProviders also work across composable functions
+    Text("This Text uses the disabled alpha now")
+}
+```
+
+在上面的所有示例中，由 Material 可组合项在内部使用 CompositionLocal 实例。如需访问 CompositionLocal 的当前值，请使用其 current 属性。在以下示例中，使用 Android 应用中常用的 LocalContext CompositionLocal 的当前 Context 值来设置文本格式：
+
+```kotlin
+@Composable
+fun FruitText(fruitSize: Int) {
+    // Get `resources` from the current value of LocalContext
+    val resources = LocalContext.current.resources
+    val fruitText = remember(resources, fruitSize) {
+        resources.getQuantityString(R.plurals.fruit_title, fruitSize)
+    }
+    Text(text = fruitText)
+}
+```
+
+> Note
+
+> 注意：CompositionLocal 对象或常量通常带有 Local 前缀，以便在 IDE 中利用自动填充功能提高可检测性。
+
+### 创建自己的 CompositionLocal
+
+CompositionLocal 是隐式向下传递数据的工具。
+
+使用 CompositionLocal 的一个关键信号是该参数为横切参数且中间层的实现不应知道该参数的存在，因为让这些中间层知道可能会限制 Composable 的功用。例如，对 Android 权限的查询是由 CompositionLocal在后台提供的。媒体选择器可以去访问设备上受权限保护的内容而无需修改 API。
+
+但不建议考完试使用 CompositionLocal ，因为它存在一些缺点：
+
++ CompositionLocal 使得 Composable 的行为更难推断。
++ 可能没有明确的可信来源，因为它可能在任何地方就改变了。因此增加调试的难度，必须向上查找给 cureent 提供值的地方。
+
+#### 决定是否使用 CompositionLocal
+
++ CompositionLocal 应具有一个默认值
++ 非以树或子层次结构为作用域
+
+#### 创建 CompositionLocal
+
+有两个 API 可以创建 CompositionLocal： - compositionLocalOf：在重组的过程中改变对应值，只会让调用该值的地方无效 - staticCompositionLocalOf:和compositionLocalOf不同，改变对应值会让整个 content lambda 重组
+
+当值几乎不变的情况下，建议使用staticCompositionLocalOf，可以提高性能。
+
+例如，想让 APP 根据系统主题来使用不同的抬高阴影时，由于在整个界面树中进行使用，所以可以使用CompositionLocal。
+LocalElevations.kt
+
+```kotlin
+data class Elevations(val card: Dp = 0.dp, val default: Dp = 0.dp)
+
+//定义一个全局的CompositionLocal并初始化
+val LocalElevations = compositionLocalOf { Elevations() }
+```
+
+#### 为CompositionLocal赋值
+
+MyActivity.kt
+
+```kotlin
+class MyActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContent {
+            // 根据主题生成不同的Elevations
+            val elevations = if (isSystemInDarkTheme()) {
+                Elevations(card = 1.dp, default = 1.dp)
+            } else {
+                Elevations(card = 0.dp, default = 0.dp)
+            }
+
+            //绑定一个elevation到LocalElevations上
+            CompositionLocalProvider(LocalElevations provides elevations) {
+                // ... Content goes here ...
+                // 在子级页面就可以调用LocalElevations.current来取到当前的Elevations
+            }
+        }
+    }
+}
+```
+
+#### 使用CompositionLocal
+
+CompositionLocal.current 根据就近原则返回CompositionLocalProvider提供的值
+
+```kotlin
+@Composable
+fun SomeComposable() {
+    // Access the globally defined LocalElevations variable to get the
+    // current Elevations in this part of the Composition
+    Card(elevation = LocalElevations.current.card) {
+        // Content
+    }
+}
+```
+
+### 需考虑的替代方案
+
+某些场景下，CompositionLocal可能不合适，甚至过度使用。
+
+#### 显式参数
+
+在极简单逻辑情况，应尽量使用显示参数传递，且只传递有效参数，避免造成参数过多。
+
+#### 控制反转
+
+另一种避免参数过多或无效参数的方法就是控制反转。一些逻辑可以不在子级页面进行，而应该转移到父级页面来进行。
+
+例如下面的例子中，在子级页面使用了 viewModel 调用 loadData
+
+```kotlin
+@Composable
+fun MyComposable(myViewModel: MyViewModel = viewModel()) {
+    // ...
+    MyDescendant(myViewModel)
+}
+
+@Composable
+fun MyDescendant(myViewModel: MyViewModel) {
+    Button(onClick = { myViewModel.loadData() }) {
+        Text("Load data")
+    }
+}
+```
+
+MyDescendant 可能需要承担很多逻辑，将 MyViewModel 作为参数传递可能会降低 MyDescendant 的可重用性，因此可以考虑控制反转来优化这个代码
+
+```kotlin
+@Composable
+fun MyComposable(myViewModel: MyViewModel = viewModel()) {
+    // ...
+    ReusableLoadDataButton(
+        onLoadClick = {
+            myViewModel.loadData()
+        }
+    )
+}
+
+@Composable
+fun ReusableLoadDataButton(onLoadClick: () -> Unit) {
+    Button(onClick = onLoadClick) {
+        Text("Load data")
+    }
+}
+```
+在某些场景下控制反转可以将子级脱离出来，达到高度复用，可以更灵活。
+
+同样，可以用 lambda 表达式来实现
+```kotlin
+@Composable
+fun MyComposable(myViewModel: MyViewModel = viewModel()) {
+    // ...
+    ReusablePartOfTheScreen(
+        content = {
+            Button(
+                onClick = {
+                    myViewModel.loadData()
+                }
+            ) {
+                Text("Confirm")
+            }
+        }
+    )
+}
+
+@Composable
+fun ReusablePartOfTheScreen(content: @Composable () -> Unit) {
+    Column {
+        // ...
+        content()
+    }
+}
+```
