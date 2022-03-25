@@ -2,4 +2,6 @@
     <string name="app_name">ComposeBasic</string>
     <string name="text">Hello text</string>
     <string name="title_activity_motion_layout" tools:ignore="ExtraTranslation">MotionLayoutActivity</string>
+    <string name="title_activity_motion_layout_demo">MotionLayoutDemo</string>
+    <string name="title_activity_login">LoginActivity</string>
 </resources>

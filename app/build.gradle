@@ -5,7 +5,6 @@ plugins {
 
 android {
     compileSdk 31
-
     defaultConfig {
         applicationId "com.example.composebasic"
         minSdk 21
@@ -44,6 +43,7 @@ android {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
     }
+
 }
 
 dependencies {
@@ -59,6 +59,8 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
+
+    implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
 
     //图标扩展库
     implementation "androidx.compose.material:material-icons-extended:$compose_version"

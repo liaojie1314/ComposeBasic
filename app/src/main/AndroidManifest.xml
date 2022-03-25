@@ -16,6 +16,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ComposeBasic">
         <activity
+            android:name=".cases.loginpage.LoginActivity"
+            android:exported="false"
+            android:label="@string/title_activity_login"
+            android:theme="@style/Theme.ComposeBasic" />
+        <activity
+            android:name=".motionlayoutdemo.MotionLayoutDemo"
+            android:exported="true"
+            android:label="@string/title_activity_motion_layout_demo"
+            android:theme="@style/Theme.ComposeBasic"></activity>
+        <activity
             android:name=".MotionLayoutActivity"
             android:exported="true"
             android:label="@string/title_activity_motion_layout"
@@ -30,7 +40,7 @@
             android:name=".MainActivity"
             android:exported="false"
             android:label="@string/app_name"
-            android:theme="@style/Theme.ComposeBasic"></activity>
+            android:theme="@style/Theme.ComposeBasic" />
     </application>
 
 </manifest>

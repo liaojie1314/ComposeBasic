@@ -36,7 +36,7 @@ fun Text(
 ): Unit
 ```
 
-###用法:
+### 用法:
 
 #### 直接显示
 
@@ -173,11 +173,12 @@ fun TextSample() {
 
 需要固定宽度，才有效果
 
-    + TextAlign.Center
-    + TextAlign.End
-    + TextAlign.Justify
+	+ TextAlign.Center
 
-+ lineHeight 设置文本行高
+- TextAlign.End
+- TextAlign.Justify
+
+- lineHeight 设置文本行高
 
 ```kotlin
 @Composable
@@ -205,10 +206,10 @@ fun TextSample() {
 
 上面讲到的大部分文字修饰，都可以直接通过 TextStyle 进行修饰，除此之外还多出几个样式
 
-    + fontFeatureSettings字体的高级设置，类似 CSS的font-feature-settings，可以参考https://www.w3.org/TR/css-fonts-3/#font-feature-settings-prop
-    + background 设置背景颜色
-    + shadow 设置阴影
-    + textIndent 设置首先缩进
++ fontFeatureSettings字体的高级设置，类似 CSS的font-feature-settings，可以参考https://www.w3.org/TR/css-fonts-3/#font-feature-settings-prop
++ background 设置背景颜色
++ shadow 设置阴影
++ textIndent 设置首先缩进
 
 ```kotlin
 @Composable
@@ -770,7 +771,7 @@ Jetpack Compose 不强制使用 MutableState存储状态，也支持其他可观
 > Warning
 
 > 在 Compose 中将可变对象，如 ArrayList或 mutableListOf()等用作状态，可以造成界面无法更新，用户看到的永远是旧的数据。建议使用可观察的数据存储器，如 State>和不可变的 listOf()，而不是使用不可观察的可变对象。
-    
+
 ### 状态提升
 
 使用remember存储对象的 Composable 中创建内部状态，使该Composable有了状态，会在其内部保持和修改自己的状态。在调用者不需要控制和管理状态的情况下，这么操作是可以的。但是一般这种Composable不能复用，也不好测试。
@@ -1070,6 +1071,8 @@ fun ExampleScreen(viewModel: ExampleViewModel = viewModel()) {
 > 如果 ViewModel 中包含要在进程重建后保留的状态，请使用`SavedStateHandle`。
 
 [官方文档](https://developer.android.google.cn/jetpack/compose/state)
+
+
 
 ## 生命周期
 
@@ -1598,5 +1601,227 @@ fun ReusablePartOfTheScreen(content: @Composable () -> Unit) {
 ```
 
 ## 动画
-    
+
 [参考官方文档](https://developer.android.google.cn/jetpack/compose/animation)
+
+
+
+## **Accompanist**  
+
+### 概述
+
+**Accompanist ：Jetpack Compose 的工具包**
+
+### 官方地址
+
+<https://google.github.io/accompanist/>
+
+<https://github.com/google/accompanist>
+
+[![Maven Central](https://img.shields.io/maven-central/v/com.google.accompanist/accompanist-insets)](https://search.maven.org/search?q=g:com.google.accompanist)
+
+### 功能
+
+#### Insets
+
+设置 [WindowsInsets](https://developer.android.google.cn/reference/kotlin/android/view/WindowInsets)
+
+配置
+
+```
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "com.google.accompanist:accompanist-insets:<version>"
+    // If using insets-ui
+    implementation "com.google.accompanist:accompanist-insets-ui:<version>"
+}
+```
+
+#### System UI Controller
+
+可以设置系统状态栏的颜色和显示隐藏
+
+配置
+
+```
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "com.google.accompanist:accompanist-systemuicontroller:<version>"
+}
+```
+
+#### AppCompat Theme Adapter
+
+引用 AppCompat 的 xml 形式主题
+
+配置
+
+```
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "com.google.accompanist:accompanist-appcompat-theme:<version>"
+}
+```
+
+#### Pager
+
+类似 Android 里面的 ViewPager
+
+配置
+
+```
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "com.google.accompanist:accompanist-pager:<version>"
+
+    // If using indicators, also depend on 
+    implementation "com.google.accompanist:accompanist-pager-indicators:<version>"
+}
+```
+
+#### Permissions
+
+权限请求
+
+配置
+
+```
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "com.google.accompanist:accompanist-permissions:<version>"
+}
+```
+
+用法参考[PermissionSample]([ComposeBasic/PermissionSample.kt at master · liaojie1314/ComposeBasic (github.com)](https://github.com/liaojie1314/ComposeBasic/blob/master/app/src/main/java/com/example/composebasic/components/PermissionSample.kt) )
+
+#### Placeholder
+
+更简单的使用数据未加载时的占位符
+
+配置
+
+```
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // If you're using Material, use accompanist-placeholder-material
+    implementation "com.google.accompanist:accompanist-placeholder-material:<version>"
+
+    // Otherwise use the foundation version
+    implementation "com.google.accompanist:accompanist-placeholder:<version>"
+}
+```
+
+#### Flow Layouts
+
+Flexbox-line 布局
+
+配置
+
+```
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "com.google.accompanist:accompanist-flowlayout:<version>"
+}
+```
+
+#### Navigation-Animation
+
+导航动画
+
+配置
+
+```
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "com.google.accompanist:accompanist-navigation-animation:<version>"
+}
+```
+
+#### Navigation-Material
+
+提供[Compose Material](https://developer.android.com/jetpack/androidx/releases/compose-material) 支持，比如 model bottom sheets
+
+配置
+
+```
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "com.google.accompanist:accompanist-navigation-material:<version>"
+}
+```
+
+#### Drawable Painter
+
+更灵活的使用 Android Drabables
+
+配置
+
+```
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "com.google.accompanist:accompanist-drawablepainter:<version>"
+}
+```
+
+#### Swipe to Refresh
+
+下拉刷新，类似 Android 的 SwipeRefreshLayout
+
+配置
+
+```
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "com.google.accompanist:accompanist-swiperefresh:<version>"
+}
+```
+
+#### WebView
+
+配置
+
+```
+repositories { 
+	mavenCentral() 
+}
+
+dependencies { 
+	implementation “com.google.accompanist:accompanist-webview:” 
+}
+```
+
+
+
