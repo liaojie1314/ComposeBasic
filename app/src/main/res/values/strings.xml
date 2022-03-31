@@ -4,4 +4,9 @@
     <string name="title_activity_motion_layout" tools:ignore="ExtraTranslation">MotionLayoutActivity</string>
     <string name="title_activity_motion_layout_demo">MotionLayoutDemo</string>
     <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_web_view">WebViewActivity</string>
+    <string name="title_activity_camera_xactivity">CameraXActivity</string>
+    <string name="title_activity_bottom_sheet_scaffold">BottomSheetScaffoldActivity</string>
+    <string name="title_activity_view_pager">ViewPagerActivity</string>
+    <string name="title_activity_weather">WeatherActivity</string>
 </resources>

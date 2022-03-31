@@ -2,7 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.composebasic">
 
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.any" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -16,6 +19,27 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ComposeBasic">
         <activity
+            android:name=".cameraxdemo.CameraXActivity"
+            android:exported="false"
+            android:label="@string/title_activity_camera_xactivity"
+            android:theme="@style/Theme.ComposeBasic" />
+        <activity
+            android:name=".bottomsheetscaffold.BottomSheetScaffoldActivity"
+            android:exported="false"
+            android:label="@string/title_activity_bottom_sheet_scaffold"
+            android:theme="@style/Theme.ComposeBasic" />
+        <activity
+            android:name=".webviewdemo.WebViewActivity"
+            android:exported="true"
+            android:label="@string/title_activity_web_view"
+            android:theme="@style/Theme.ComposeBasic">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".cases.loginpage.LoginActivity"
             android:exported="false"
             android:label="@string/title_activity_login"
@@ -24,18 +48,12 @@
             android:name=".motionlayoutdemo.MotionLayoutDemo"
             android:exported="true"
             android:label="@string/title_activity_motion_layout_demo"
-            android:theme="@style/Theme.ComposeBasic"></activity>
+            android:theme="@style/Theme.ComposeBasic" />
         <activity
             android:name=".MotionLayoutActivity"
-            android:exported="true"
+            android:exported="false"
             android:label="@string/title_activity_motion_layout"
-            android:theme="@style/Theme.ComposeBasic">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:theme="@style/Theme.ComposeBasic" />
         <activity
             android:name=".MainActivity"
             android:exported="false"
